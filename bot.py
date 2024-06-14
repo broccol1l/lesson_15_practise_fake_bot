@@ -1,9 +1,8 @@
 import telebot
 import buttons as bt
+import database as db
 
 bot = telebot.TeleBot(token="7365056271:AAGYXlXsFlg-rkbccuo7cOIZ-N4dpIajhdU")
-
-@bot.message_handler(content_types=[""])
 
 @bot.message_handler(commands=["start"])
 def start(message):
@@ -40,6 +39,7 @@ def get_location(message, name, number):
                                   f"Имя: {name}\n"
                                   f"Номер телефона: {number}\n"
                                   f"Место проживания: {location}")
+        db.add_user(user_id, name, number)
     else:
         bot.send_message(user_id, "Отправьте свою локацию через кнопку",
                          reply_markup=bt.location_bt())
