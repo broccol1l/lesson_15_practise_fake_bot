@@ -60,14 +60,19 @@ def product_call(call):
     product_info = db.get_exact_product(product_id)
     bot.send_photo(user_id, photo=product_info[3], caption=f"{product_info[0]}\n\n"
                                                            f"Описание: {product_info[2]}\n"
-                                                           f"Цена : {product_info[1]} сум")
+                                                           f"Цена : {product_info[1]} сум",
+                   reply_markup=bt.exact_product())
 
-@bot.callback_query_handler(lambda call: call.data in ["main_menu"])
+@bot.callback_query_handler(lambda call: call.data in ["main_menu", "cart", "minus", "plus"])
 def all_calls(call):
     user_id = call.message.chat.id
     if call.data == "main_menu":
         bot.delete_message(user_id, call.message.message_id)
         bot.send_message(user_id, "Выберите действие", reply_markup=bt.main_menu_kb())
+    elif call.data == "cart":
+        bot.send_message(user_id, "Ваша корзина")
+    elif call.data == "plus":
+
 
 # DZ RUS-UZB
 @bot.callback_query_handler(lambda call: True)

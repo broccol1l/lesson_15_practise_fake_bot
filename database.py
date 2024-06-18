@@ -95,20 +95,27 @@ def add_to_cart(user_id, pr_id, pr_name, pr_count, pr_price):
                 "VALUES (?,?,?,?,?);", (user_id, pr_id, pr_name, pr_count, total_price))
     connection.commit()
 
-def delete_exact_pr_from_cart(user_id, pr_id):
-    connection = sqlite3.connect("garry_food.db")
-    sql = connection.cursor()
-    sql.execute("DELETE FROM cart WHERE user_id=? and pr_id=?;", (user_id, pr_id))
-    connection.commit()
-
-def delete_exact_user_cart(user_id):
+def delete_user_cart(user_id):
     connection = sqlite3.connect("garry_food.db")
     sql = connection.cursor()
     sql.execute("DELETE FROM cart WHERE user_id=?;", (user_id, ))
     connection.commit()
 
+def delete_exact_product_from_cart(user_id, pr_id):
+    connection = sqlite3.connect("garry_food.db")
+    sql = connection.cursor()
+    sql.execute("DELETE FROM cart WHERE user_id=? and pr_id=?;", (user_id, pr_id))
+    connection.commit()
+
 def get_cart_id_name(user_id):
     connection = sqlite3.connect("garry_food.db")
     sql = connection.cursor()
-    cart_info = sql.execute("SELECT * FROM cart WHERE user_id=?;", (user_id, )).fetchone()
-    return cart_info
+    user_cart = sql.execute("SELECT pr_name, pr_id FROM cart WHERE user_id=?;", (user_id, )).fetchall()
+    return user_cart
+
+def get_user_cart(user_id):
+    connection = sqlite3.connect("garry_food.db")
+    sql = connection.cursor()
+    user_cart = sql.execute("SELECT pr_name, pr_count, total_price FROM cart"
+                            "WHERE user_id=?;", (user_id, )).fetchall()
+    return user_cart
