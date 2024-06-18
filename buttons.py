@@ -35,7 +35,7 @@ def products_in(all_products):
     main_menu = types.InlineKeyboardButton(text="Главное меню", callback_data="main_menu")
     cart = types.InlineKeyboardButton(text="Корзина", callback_data="cart")
 
-    all_buttons = [types.InlineKeyboardButton(text=product[1], callback_data=f"prod_{product[0]}")
+    all_buttons = [types.InlineKeyboardButton(text=product[0], callback_data=f"prod_{product[1]}")
                    for product in all_products]
     kb.add(*all_buttons)
     kb.row(cart)
@@ -63,6 +63,16 @@ def exact_product(plus_or_minus="", current_amount=1):
     kb.row(back)
     return kb
 
+def get_cart_kb(cart):
+    kb = types.InlineKeyboardMarkup(row_width=1)
+    clear = types.InlineKeyboardButton(text="Очистить корзину", callback_data="clear_cart")
+    back = types.InlineKeyboardButton(text="◀️Назад", callback_data="back")
+    order = types.InlineKeyboardButton(text="Оформить заказ", callback_data="order")
+
+    product = [types.InlineKeyboardButton(text=f"❌{i[0]}", callback_data=f"delete_{i[1]}") for i in cart]
+    kb.add(clear, back, order)
+    kb.add(*product)
+    return kb
 
 
 
