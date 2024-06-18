@@ -3,6 +3,7 @@ import buttons as bt
 import database as db
 
 bot = telebot.TeleBot(token="7365056271:AAGYXlXsFlg-rkbccuo7cOIZ-N4dpIajhdU")
+users = {}
 
 #db.add_product(pr_name="Chicken Donar", pr_desc="The best", pr_price=30000, pr_quantity=9, pr_photo="https://чайхана-дзр.рф/wp-content/uploads/2018/09/doner-chiken.jpg")
 #db.add_product(pr_name="Lavash", pr_desc="The bestie", pr_price=30000, pr_quantity=9, pr_photo="https://avatars.mds.yandex.net/get-sprav-products/9685839/2a00000188b586064be748d4713c1b0912eb/M_height")
@@ -58,12 +59,14 @@ def product_call(call):
     bot.delete_message(user_id, call.message.message_id)
     product_id = int(call.data.replace("prod_", ""))
     product_info = db.get_exact_product(product_id)
+    users[user_id] = {"pr_id": product_id, "pr_name": product_info[0], "pr_count":1, "pr_price": product_info[1]}
     bot.send_photo(user_id, photo=product_info[3], caption=f"{product_info[0]}\n\n"
                                                            f"Описание: {product_info[2]}\n"
                                                            f"Цена : {product_info[1]} сум",
                    reply_markup=bt.exact_product())
 
-@bot.callback_query_handler(lambda call: call.data in ["main_menu", "cart", "minus", "plus"])
+@bot.callback_query_handler(lambda call: call.data in ["main_menu", "cart", "minus", "plus", "none", "back",
+                                                       "to_cart"])
 def all_calls(call):
     user_id = call.message.chat.id
     if call.data == "main_menu":
@@ -72,6 +75,35 @@ def all_calls(call):
     elif call.data == "cart":
         bot.send_message(user_id, "Ваша корзина")
     elif call.data == "plus":
+        current_amount = users[user_id]["pr_count"]
+        users[user_id]["pr_count"] += 1
+        bot.edit_message_reply_markup(chat_id=user_id, message_id=call.message.message_id,
+                                      reply_markup=bt.exact_product(current_amount=current_amount,
+                                                                    plus_or_minus="plus"))
+    elif call.data == "minus":
+        current_amount = users[user_id]["pr_count"]
+        if current_amount > 1:
+            users[user_id]["pr_count"] -= 1
+            bot.edit_message_reply_markup(chat_id=user_id, message_id=call.message.message_id,
+                                          reply_markup=bt.exact_product(current_amount=current_amount,
+                                                                        plus_or_minus="minus"))
+        else:
+            pass
+    elif call.data == "none":
+        pass
+    elif call.data == "back":
+        bot.delete_message(user_id, call.message.message_id)
+        # users.pop(user_id)
+        all_product = db.get_pr_id_name()
+        bot.send_message(user_id, "Выберите продукт", reply_markup=bt.products_in(all_product))
+    elif call.data == "to_cart":
+        db.add_to_cart(user_id, users[user_id]["pr_id"], users[user_id]["pr_name"],
+                       users[user_id]["pr_count"], users[user_id]["pr_price"])
+        users.pop(user_id)
+        bot.delete_message(user_id, call.message.message_id)
+        all_product = db.get_pr_id_name()
+        bot.send_message(user_id, "Продукт добавлен в корзину. Выберите продукт",
+                         reply_markup=bt.products_in(all_product))
 
 
 # DZ RUS-UZB
